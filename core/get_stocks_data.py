@@ -1,5 +1,4 @@
 import json
-import os
 import pandas_datareader.data as pdr
 import fix_yahoo_finance as fix
 import time
