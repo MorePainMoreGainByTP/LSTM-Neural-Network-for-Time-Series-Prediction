@@ -1,4 +1,4 @@
-import math
+
 import numpy as np
 import pandas as pd
 
@@ -6,9 +6,14 @@ class DataLoader():
 	"""A class for loading and transforming data for the lstm model"""
 
 	def __init__(self, filename, split, cols):
+		'''
+		filename:数据所在文件名， '.csv'格式文件
+		split:训练与测试数据分割变量
+		cols:选择data的一列或者多列进行分析，如 Close 和 Volume
+		'''
 		dataframe = pd.read_csv(filename)
 		i_split = int(len(dataframe) * split)
-		self.data_train = dataframe.get(cols).values[:i_split]
+		self.data_train = dataframe.get(cols).values[:i_split]		#选择指定的列 进行分割 得到 未处理的训练数据
 		self.data_test  = dataframe.get(cols).values[i_split:]
 		self.len_train  = len(self.data_train)
 		self.len_test   = len(self.data_test)
@@ -22,14 +27,20 @@ class DataLoader():
 		'''
 		data_windows = []
 		for i in range(self.len_test - seq_len):
-			data_windows.append(self.data_test[i:i+seq_len])
+			data_windows.append(self.data_test[i:i+seq_len])	#每一个元素是长度为seq_len的 list即一个window
 
 		data_windows = np.array(data_windows).astype(float)
 		data_windows = self.normalise_windows(data_windows, single_window=False) if normalise else data_windows
 
+		# print("get_test_data-->data_windows:\n",data_windows)
+
 		x = data_windows[:, :-1]
 		y = data_windows[:, -1, [0]]
-		return x,y
+
+		# print("\n get_test_data-->x:\n",x)
+		# print("\n get_test_data-->y:\n",y)
+
+		return x, y
 
 	def get_train_data(self, seq_len, normalise):
 		'''
@@ -43,6 +54,10 @@ class DataLoader():
 			x, y = self._next_window(i, seq_len, normalise)
 			data_x.append(x)
 			data_y.append(y)
+
+		# print("\n get_train_data-->data_x:\n",data_x)
+		# print("\n get_train_data-->data_y:\n",data_y)
+
 		return np.array(data_x), np.array(data_y)
 
 	def generate_train_batch(self, seq_len, batch_size, normalise):
@@ -78,6 +93,6 @@ class DataLoader():
 			for col_i in range(window.shape[1]):
 				normalised_col = [((float(p) / float(window[0, col_i])) - 1) for p in window[:, col_i]]
 				normalised_window.append(normalised_col)
-			normalised_window = np.array(normalised_window).T # reshape and transpose array back into original multidimensional format				
+			normalised_window = np.array(normalised_window).T  # reshape and transpose array back into original multidimensional format
 			normalised_data.append(normalised_window)
 		return np.array(normalised_data)

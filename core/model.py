@@ -15,10 +15,18 @@ class Model():
 		self.model = Sequential()
 
 	def load_model(self, filepath):
+		'''
+		从本地保存的模型参数来加载模型
+		filepath: .h5 格式文件
+		'''
 		print('[Model] Loading model from file %s' % filepath)
 		self.model = load_model(filepath)
 
 	def build_model(self, configs):
+		"""
+		新建一个模型
+		configs:配置文件
+		"""
 		timer = Timer()
 		timer.start()
 
@@ -40,7 +48,7 @@ class Model():
 		self.model.compile(loss=configs['model']['loss'], optimizer=configs['model']['optimizer'])
 
 		print('[Model] Model Compiled')
-		timer.stop()
+		timer.stop()	#输出构建一个模型耗时
 
 	def train(self, x, y, epochs, batch_size, save_dir):
 		timer = Timer()
@@ -60,12 +68,15 @@ class Model():
 			batch_size=batch_size,
 			callbacks=callbacks
 		)
-		self.model.save(save_fname)
+		self.model.save(save_fname)	#保存训练好的模型
 
 		print('[Model] Training Completed. Model saved as %s' % save_fname)
-		timer.stop()
+		timer.stop()	#输出训练耗时
 
 	def train_generator(self, data_gen, epochs, batch_size, steps_per_epoch, save_dir):
+		'''
+		由data_gen数据产生器来，逐步产生训练数据，而不是一次性将数据读入到内存
+		'''
 		timer = Timer()
 		timer.start()
 		print('[Model] Training Started')
